@@ -113,22 +113,43 @@ class MatchReading:
         )
 
         # ---- 比分推估 ---------------------------------------------------- #
+        # 比分加總必須與大小分推估同調,否則會出現「比分 1:2(共 3 球)卻判小分」
+        # 的自相矛盾。因此調整勝負時採「在兩隊之間挪移進球」而非「額外加球」,
+        # 平手比分也與 2.5 線同側,確保兩項預言一致。
         total_goals_int = int(round(predicted_total))
         if power_home + power_away <= 0:
             home_share = 0.5
         else:
             home_share = power_home / (power_home + power_away)
-        home_goals = int(round(total_goals_int * home_share))
-        away_goals = total_goals_int - home_goals
 
-        # 讓比分與勝負結論一致
-        if self.winner == "home" and home_goals <= away_goals:
-            home_goals = away_goals + 1
-        elif self.winner == "away" and away_goals <= home_goals:
-            away_goals = home_goals + 1
-        elif self.winner == "draw" and home_goals != away_goals:
-            avg = (home_goals + away_goals) // 2
-            home_goals = away_goals = avg
+        if total_goals_int <= 0:
+            # 幾無進球卻有勝負傾向時,給出最小勝局
+            if self.winner == "home":
+                home_goals, away_goals = 1, 0
+            elif self.winner == "away":
+                home_goals, away_goals = 0, 1
+            else:
+                home_goals, away_goals = 0, 0
+        elif self.winner == "draw":
+            # 平局比分加總須為偶數,並與大小分傾向落在 2.5 的同一側
+            if predicted_total > line:
+                home_goals = away_goals = 2
+            else:
+                home_goals = away_goals = 1 if total_goals_int >= 2 else 0
+        else:
+            home_goals = max(0, min(total_goals_int,
+                                    int(round(total_goals_int * home_share))))
+            away_goals = total_goals_int - home_goals
+            # 維持總進球不變,把進球在兩隊間挪移以符合勝負結論
+            if self.winner == "home" and home_goals <= away_goals:
+                move = (away_goals - home_goals) // 2 + 1
+                home_goals += move
+                away_goals -= move
+            elif self.winner == "away" and away_goals <= home_goals:
+                move = (home_goals - away_goals) // 2 + 1
+                away_goals += move
+                home_goals -= move
+
         self.predicted_score = (home_goals, away_goals)
 
         # ---- 讓分/受讓 --------------------------------------------------- #

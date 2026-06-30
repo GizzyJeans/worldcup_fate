@@ -110,6 +110,29 @@ class TestDivination(unittest.TestCase):
             else:
                 self.assertEqual(h, a, f"{home} vs {away}")
 
+    def test_score_total_consistent_with_over_under(self):
+        """比分加總不得與大小分(2.5 線)結論自相矛盾。"""
+        names = ["阿根廷", "法國", "巴西", "英格蘭", "西班牙", "德國",
+                 "葡萄牙", "荷蘭", "象牙海岸", "挪威", "墨西哥", "厄瓜多",
+                 "克羅埃西亞", "摩洛哥", "日本", "美國"]
+        stages = ["小組賽", "32強淘汰賽", "八強", "決賽"]
+        for i, home in enumerate(names):
+            away = names[(i + 1) % len(names)]
+            for stage in stages:
+                r = divine(home, away, stage=stage, date="2026-07-01")
+                total = sum(r.predicted_score)
+                ctx = f"{home} vs {away} [{stage}] total={r.predicted_total} score={r.predicted_score}"
+                if r.predicted_total < 2.25:      # 判小分
+                    self.assertLessEqual(total, 2, ctx)
+                elif r.predicted_total > 2.75:    # 判大分
+                    self.assertGreaterEqual(total, 3, ctx)
+
+    def test_ivory_coast_norway_case_fixed(self):
+        """象牙海岸 vs 挪威(32強)曾出現 1:2 卻判小分的矛盾,須修正。"""
+        r = divine("象牙海岸", "挪威", stage="32強淘汰賽", date="2026-06-30")
+        self.assertLess(r.predicted_total, 2.5)        # 仍判小分
+        self.assertLessEqual(sum(r.predicted_score), 2)  # 比分加總亦須 <= 2
+
 
 if __name__ == "__main__":
     unittest.main()
