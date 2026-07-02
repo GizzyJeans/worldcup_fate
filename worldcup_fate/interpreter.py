@@ -28,6 +28,11 @@ class MatchReading:
     date: str
     cards: dict[str, DrawnCard]          # position key -> DrawnCard
 
+    # 選填的賽事資訊(僅供顯示,不影響命運種子)
+    venue: str = ""
+    kickoff: str = ""
+    source: str = ""
+
     # 推導出的數值結果(便於程式化取用)
     winner: str = ""                      # "home" / "away" / "draw"
     win_text: str = ""
@@ -209,8 +214,13 @@ class MatchReading:
         return self
 
 
-def divine(home: str, away: str, stage: str = "小組賽", date: str | None = None) -> MatchReading:
-    """為一場對戰進行占卜,回傳已完成推導的 MatchReading。"""
+def divine(home: str, away: str, stage: str = "小組賽", date: str | None = None,
+           venue: str = "", kickoff: str = "", source: str = "") -> MatchReading:
+    """為一場對戰進行占卜,回傳已完成推導的 MatchReading。
+
+    venue / kickoff / source 僅供顯示,不參與命運種子的計算,因此帶入賽事
+    資訊不會改變牌面。
+    """
     if date is None:
         date = _dt.date.today().isoformat()
 
@@ -220,5 +230,6 @@ def divine(home: str, away: str, stage: str = "小組賽", date: str | None = No
 
     reading = MatchReading(
         home=home, away=away, stage=stage, date=date, cards=cards,
+        venue=venue, kickoff=kickoff, source=source,
     )
     return reading.compute()

@@ -25,6 +25,10 @@ def render(reading: MatchReading) -> str:
     add(f"對戰　：{r.home}（主）　VS　{r.away}（客）")
     add(f"階段　：{r.stage}")
     add(f"日期　：{r.date}")
+    if r.venue:
+        add(f"場館　：{r.venue}")
+    if r.kickoff:
+        add(f"開賽　：{r.kickoff}")
     add(f"牌陣　：世界杯七張牌戰局牌陣")
     add("")
 
@@ -53,6 +57,8 @@ def render(reading: MatchReading) -> str:
     add("─" * 60)
     add("※ 本占卜純依牌面客觀推導,不參考賭盤賠率、過盤率或主觀強弱。")
     add("※ 命運已定,同場同日不可重抽。牌面僅供參酌,勝負終須綠茵見真章。")
+    if r.source:
+        add(f"※ 賽程資料來源:{r.source}(以 FIFA 官方為準)")
     add("=" * 60)
 
     return "\n".join(lines)

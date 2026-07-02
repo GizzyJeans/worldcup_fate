@@ -10,6 +10,7 @@ from .cards import Card, build_deck, FULL_DECK
 from .deck import Deck
 from .spread import WORLD_CUP_SPREAD, SpreadPosition
 from .interpreter import MatchReading, divine
+from .fixtures import find_fixture, normalize_team, iter_fixtures, FIXTURES
 
 __all__ = [
     "Card",
@@ -20,6 +21,10 @@ __all__ = [
     "SpreadPosition",
     "MatchReading",
     "divine",
+    "find_fixture",
+    "normalize_team",
+    "iter_fixtures",
+    "FIXTURES",
 ]
 
 __version__ = "1.0.0"

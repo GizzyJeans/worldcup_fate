@@ -10,6 +10,8 @@ from worldcup_fate import FULL_DECK, build_deck, divine  # noqa: E402
 from worldcup_fate.cards import Card  # noqa: E402
 from worldcup_fate.deck import Deck  # noqa: E402
 from worldcup_fate.spread import POSITION_COUNT  # noqa: E402
+from worldcup_fate import fixtures  # noqa: E402
+from worldcup_fate.cli import main as cli_main  # noqa: E402
 
 
 class TestDeck(unittest.TestCase):
@@ -132,6 +134,55 @@ class TestDivination(unittest.TestCase):
         r = divine("象牙海岸", "挪威", stage="32強淘汰賽", date="2026-06-30")
         self.assertLess(r.predicted_total, 2.5)        # 仍判小分
         self.assertLessEqual(sum(r.predicted_score), 2)  # 比分加總亦須 <= 2
+
+
+class TestFixtures(unittest.TestCase):
+    def test_normalize_team_chinese_and_english(self):
+        self.assertEqual(fixtures.normalize_team("西班牙"), "Spain")
+        self.assertEqual(fixtures.normalize_team("奧地利"), "Austria")
+        self.assertEqual(fixtures.normalize_team(" spain "), "Spain")
+        self.assertEqual(fixtures.normalize_team("Austria"), "Austria")
+
+    def test_normalize_unknown_returns_stripped(self):
+        self.assertEqual(fixtures.normalize_team("  火星隊 "), "火星隊")
+
+    def test_find_fixture_order_independent(self):
+        a = fixtures.find_fixture("西班牙", "奧地利")
+        b = fixtures.find_fixture("奧地利", "西班牙")
+        c = fixtures.find_fixture("Spain", "Austria")
+        self.assertIsNotNone(a)
+        self.assertEqual(a, b)
+        self.assertEqual(a, c)
+        self.assertEqual(a["stage"], "32強淘汰賽")
+        self.assertEqual(a["date"], "2026-07-02")
+
+    def test_find_fixture_not_found(self):
+        self.assertIsNone(fixtures.find_fixture("巴西", "火星隊"))
+
+    def test_auto_fills_stage_and_date_without_changing_seed(self):
+        """--auto 帶入的賽程資訊不得改變牌面(命運種子只取決於隊名/階段/日期)。"""
+        fx = fixtures.find_fixture("西班牙", "奧地利")
+        auto = divine("西班牙", "奧地利", stage=fx["stage"], date=fx["date"],
+                      venue=fx["venue"], kickoff=fx["kickoff"])
+        manual = divine("西班牙", "奧地利", stage="32強淘汰賽", date="2026-07-02")
+        self.assertEqual(auto.predicted_score, manual.predicted_score)
+        self.assertEqual(auto.winner, manual.winner)
+        self.assertEqual(auto.confidence, manual.confidence)
+        self.assertTrue(auto.venue)  # 場館有被帶入顯示
+
+
+class TestCli(unittest.TestCase):
+    def test_cli_auto_json_runs(self):
+        rc = cli_main(["西班牙", "奧地利", "--auto", "--json"])
+        self.assertEqual(rc, 0)
+
+    def test_cli_list_fixtures(self):
+        rc = cli_main(["--list-fixtures"])
+        self.assertEqual(rc, 0)
+
+    def test_cli_missing_teams_errors(self):
+        with self.assertRaises(SystemExit):
+            cli_main([])
 
 
 if __name__ == "__main__":

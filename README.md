@@ -18,6 +18,12 @@ python -m worldcup_fate 阿根廷 法國
 # 指定賽事階段與日期
 python -m worldcup_fate 西班牙 德國 --stage 八強 --date 2026-07-04
 
+# 自動查表:依隊名帶入已查證的階段/日期/場館再開牌
+python -m worldcup_fate 西班牙 奧地利 --auto
+
+# 列出已收錄的賽程
+python -m worldcup_fate --list-fixtures
+
 # 以 JSON 輸出機讀結果
 python -m worldcup_fate 巴西 英格蘭 --json
 
@@ -31,9 +37,22 @@ python divine.py 葡萄牙 荷蘭 --stage 決賽
 |------|------|------|
 | `home` | 主隊名稱(先列出的隊伍) | 必填 |
 | `away` | 客隊名稱(後列出的隊伍) | 必填 |
-| `--stage` | 賽事階段,如:小組賽 / 十六強 / 八強 / 準決賽 / 決賽 | `小組賽` |
+| `--stage` | 賽事階段,如:小組賽 / 32強淘汰賽 / 十六強 / 八強 / 準決賽 / 決賽 | `小組賽` |
 | `--date` | 比賽日期 `YYYY-MM-DD`,影響命運種子 | 今日 |
+| `--auto` | 依隊名自動查表帶入已查證的階段/日期/場館(查無則沿用手動值) | 關閉 |
+| `--list-fixtures` | 列出已收錄的賽程後結束 | 關閉 |
 | `--json` | 輸出 JSON 而非占卜報告 | 關閉 |
+
+### 賽程自動查表(`--auto`)
+
+直接爬 FIFA／新聞網站在出貨的 CLI 中並不可靠(多數站點以 403 阻擋爬蟲),
+因此本專案改採更穩健的做法:在 `worldcup_fate/fixtures.py` 內建一份
+**已查證的賽程資料集**,`--auto` 會依隊名(支援中英對照、順序不拘)自動帶入
+正確的**階段、日期、場館與開賽時間**再開牌。
+
+- 賽程資料整理自 2026 年 7 月的公開報導(每筆附 `source`),**最終請以 FIFA 官方為準**。
+- 場館與開賽時間僅供顯示,**不影響命運種子**——帶入賽事資訊不會改變牌面。
+- 要新增或更新賽程,直接編輯 `fixtures.py` 的 `FIXTURES` 清單即可。
 
 ---
 
@@ -116,6 +135,7 @@ worldcup_fate/
 │   ├── deck.py           # 命運種子、洗牌與抽牌
 │   ├── spread.py         # 七張牌世界杯戰局牌陣定義
 │   ├── interpreter.py    # 解讀引擎(牌面 → 預言)
+│   ├── fixtures.py       # 已查證賽程資料集與隊名查表(--auto)
 │   ├── report.py         # 占卜報告渲染
 │   ├── cli.py            # 命令列介面
 │   └── __main__.py       # python -m worldcup_fate 入口
