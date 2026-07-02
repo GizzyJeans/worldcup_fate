@@ -45,6 +45,8 @@ _TEAM_ALIASES: dict[str, str] = {
     "日本": "Japan", "japan": "Japan",
     "美國": "USA", "美国": "USA", "usa": "USA", "united states": "USA",
     "摩洛哥": "Morocco", "morocco": "Morocco",
+    "瑞士": "Switzerland", "switzerland": "Switzerland",
+    "阿爾及利亞": "Algeria", "阿尔及利亚": "Algeria", "algeria": "Algeria",
 }
 
 # --------------------------------------------------------------------------- #
@@ -74,6 +76,14 @@ FIXTURES: list[dict] = [
         "venue": "Hard Rock Stadium, Miami Gardens",
         "teams": ["Argentina", "Cape Verde"],
         "source": "https://sports.yahoo.com/soccer/article/world-cup-2026-round-of-32-full-bracket-matchups-schedule-and-how-each-team-qualified-164942403.html",
+    },
+    {
+        "stage": "32強淘汰賽",
+        "date": "2026-07-02",
+        "kickoff": "20:00 PT / 23:00 ET",
+        "venue": "BC Place, Vancouver",
+        "teams": ["Switzerland", "Algeria"],
+        "source": "https://www.espn.com/soccer/story/_/id/49223711/fifa-world-cup-2026-switzerland-vs-algeria-tv-channel-how-watch-kickoff-live-stream-referee-predicted-lineups",
     },
 ]
 
