@@ -47,6 +47,9 @@ _TEAM_ALIASES: dict[str, str] = {
     "摩洛哥": "Morocco", "morocco": "Morocco",
     "瑞士": "Switzerland", "switzerland": "Switzerland",
     "阿爾及利亞": "Algeria", "阿尔及利亚": "Algeria", "algeria": "Algeria",
+    "澳洲": "Australia", "澳大利亞": "Australia", "澳大利亚": "Australia",
+    "australia": "Australia",
+    "埃及": "Egypt", "egypt": "Egypt",
 }
 
 # --------------------------------------------------------------------------- #
@@ -84,6 +87,14 @@ FIXTURES: list[dict] = [
         "venue": "BC Place, Vancouver",
         "teams": ["Switzerland", "Algeria"],
         "source": "https://www.espn.com/soccer/story/_/id/49223711/fifa-world-cup-2026-switzerland-vs-algeria-tv-channel-how-watch-kickoff-live-stream-referee-predicted-lineups",
+    },
+    {
+        "stage": "32強淘汰賽",
+        "date": "2026-07-03",
+        "kickoff": "14:00 CT(場地當地)",
+        "venue": "AT&T Stadium, Arlington(達拉斯)",
+        "teams": ["Australia", "Egypt"],
+        "source": "https://socceroos.com.au/news/how-watch-australia-vs-egypt-fifa-world-cup-2026tm-round-32",
     },
 ]
 
