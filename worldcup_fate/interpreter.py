@@ -18,6 +18,15 @@ def _clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
 
 
+# 淘汰賽階段的判別關鍵字:32強/十六強/八強(含「強」)、淘汰、決賽/準決賽
+_KNOCKOUT_MARKERS = ("強", "淘汰", "決賽")
+
+
+def _is_knockout(stage: str) -> bool:
+    """淘汰賽必分勝負(延長/PK),不存在平局收場。"""
+    return any(marker in stage for marker in _KNOCKOUT_MARKERS)
+
+
 @dataclass
 class MatchReading:
     """一場對戰的完整占卜結果。"""
@@ -35,6 +44,7 @@ class MatchReading:
 
     # 推導出的數值結果(便於程式化取用)
     winner: str = ""                      # "home" / "away" / "draw"
+    knife_edge: bool = False              # 淘汰賽中戰力差極小、一線之間的對決
     win_text: str = ""
     handicap_text: str = ""
     totals_text: str = ""
@@ -72,12 +82,22 @@ class MatchReading:
         chaos = (wild_e.volatility + tot_e.volatility * 0.5 + verdict_e.volatility * 0.5)
 
         # ---- 勝負判定 ---------------------------------------------------- #
+        # 校準(2026-07-03,依 32 強六場實績):淘汰賽必分勝負,戰力差
+        # 落在 ±2 之內不再判平局,改判「一線之間」並以差距方向定晉級方。
+        knockout = _is_knockout(self.stage)
         if margin > 2.0:
             self.winner = "home"
             favored, underdog = self.home, self.away
         elif margin < -2.0:
             self.winner = "away"
             favored, underdog = self.away, self.home
+        elif knockout:
+            self.knife_edge = True
+            self.winner = "home" if margin >= 0 else "away"
+            if self.winner == "home":
+                favored, underdog = self.home, self.away
+            else:
+                favored, underdog = self.away, self.home
         else:
             self.winner = "draw"
             favored = underdog = ""
@@ -86,6 +106,11 @@ class MatchReading:
             self.win_text = (
                 f"牌面天秤持平(戰力差 {margin:+.1f}),雙方旗鼓相當,"
                 f"平局氣息濃厚;若分勝負,將是極小差距的拉鋸。"
+            )
+        elif self.knife_edge:
+            self.win_text = (
+                f"牌面一線之間(戰力差 {margin:+.1f}),**{favored}** 僅具毫釐之先;"
+                f"90 分鐘恐難分高下,不排除延長甚至 PK,{underdog} 隨時可能翻越。"
             )
         else:
             edge = abs(margin)
@@ -103,7 +128,9 @@ class MatchReading:
             + (home_e.attack + away_e.attack) * 0.3
             - (home_e.defense + away_e.defense) * 0.2
         )
-        predicted_total = _clamp(goal_energy / 14.0, 0.4, 5.2)
+        # 校準(2026-07-03):原除數 14.0 有系統性小分偏誤——32 強六場推估
+        # 均值 1.70 球、實際均值 2.67 球;改為 9.0 後平均絕對誤差 0.97 → 0.34。
+        predicted_total = _clamp(goal_energy / 9.0, 0.4, 5.2)
         self.predicted_total = round(predicted_total, 2)
 
         line = 2.5
@@ -141,6 +168,13 @@ class MatchReading:
                 home_goals = away_goals = 2
             else:
                 home_goals = away_goals = 1 if total_goals_int >= 2 else 0
+        elif self.knife_edge:
+            # 一線之間:給最小差距的決勝比分,總球數與大小分傾向同側
+            win_g, lose_g = (2, 1) if predicted_total >= line else (1, 0)
+            if self.winner == "home":
+                home_goals, away_goals = win_g, lose_g
+            else:
+                home_goals, away_goals = lose_g, win_g
         else:
             home_goals = max(0, min(total_goals_int,
                                     int(round(total_goals_int * home_share))))
@@ -162,6 +196,13 @@ class MatchReading:
         if self.winner == "draw" or diff == 0:
             self.handicap_text = (
                 "牌面無明顯讓步空間,**平手盤 (0)** 最為貼合;受讓方價值浮現。"
+            )
+        elif self.knife_edge:
+            favored_name = self.home if self.winner == "home" else self.away
+            underdog_name = self.away if self.winner == "home" else self.home
+            self.handicap_text = (
+                f"一線之盤:**{favored_name}** 至多讓 **0.5 球**;"
+                f"平手盤與受讓 {underdog_name} 皆具價值,深盤不宜。"
             )
         else:
             # 讓分線取在預期分差附近的半球盤
@@ -208,6 +249,8 @@ class MatchReading:
             base += min(abs(margin), 10) * 1.2    # 戰力差越大越有信心
         else:
             base -= 6                             # 平局本就難測
+        if self.knife_edge:
+            base -= 6                             # 一線之間,與平局同樣難測
         base += verdict_e.momentum                # 定論之牌的氣勢加成
         self.confidence = int(_clamp(round(base), 30, 94))
 

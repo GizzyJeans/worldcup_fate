@@ -63,6 +63,7 @@ def _to_dict(reading) -> dict:
         "venue": reading.venue,
         "kickoff": reading.kickoff,
         "winner": reading.winner,
+        "knife_edge": reading.knife_edge,
         "predicted_score": list(reading.predicted_score),
         "predicted_total": reading.predicted_total,
         "confidence": reading.confidence,

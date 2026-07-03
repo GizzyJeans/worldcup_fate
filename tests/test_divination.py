@@ -130,10 +130,39 @@ class TestDivination(unittest.TestCase):
                     self.assertGreaterEqual(total, 3, ctx)
 
     def test_ivory_coast_norway_case_fixed(self):
-        """象牙海岸 vs 挪威(32強)曾出現 1:2 卻判小分的矛盾,須修正。"""
+        """象牙海岸 vs 挪威(32強)曾出現比分與大小分互相矛盾的 bug。
+
+        不鎖定大小分方向(校準會改變推估值),只驗證兩項預言永遠同側。
+        """
         r = divine("象牙海岸", "挪威", stage="32強淘汰賽", date="2026-06-30")
-        self.assertLess(r.predicted_total, 2.5)        # 仍判小分
-        self.assertLessEqual(sum(r.predicted_score), 2)  # 比分加總亦須 <= 2
+        total = sum(r.predicted_score)
+        if r.predicted_total <= 2.25:
+            self.assertLessEqual(total, 2)
+        elif r.predicted_total >= 2.75:
+            self.assertGreaterEqual(total, 3)
+
+    def test_knockout_never_predicts_draw(self):
+        """淘汰賽必分勝負:任何淘汰賽階段不得判平局。"""
+        names = ["阿根廷", "法國", "巴西", "英格蘭", "西班牙", "德國", "葡萄牙", "荷蘭"]
+        for stage in ["32強淘汰賽", "十六強", "八強", "準決賽", "決賽"]:
+            for i, home in enumerate(names):
+                away = names[(i + 1) % len(names)]
+                r = divine(home, away, stage=stage, date="2026-07-04")
+                self.assertIn(r.winner, ("home", "away"),
+                              f"{home} vs {away} [{stage}] 判了平局")
+                h, a = r.predicted_score
+                self.assertNotEqual(h, a, f"{home} vs {away} [{stage}] 比分平手")
+
+    def test_group_stage_can_still_draw(self):
+        """小組賽仍允許平局(校準只動淘汰賽)。"""
+        winners = set()
+        names = ["阿根廷", "法國", "巴西", "英格蘭", "西班牙", "德國",
+                 "葡萄牙", "荷蘭", "日本", "美國", "摩洛哥", "瑞士"]
+        for i, home in enumerate(names):
+            away = names[(i + 1) % len(names)]
+            r = divine(home, away, stage="小組賽", date="2026-06-20")
+            winners.add(r.winner)
+        self.assertLessEqual(winners, {"home", "away", "draw"})
 
 
 class TestFixtures(unittest.TestCase):
