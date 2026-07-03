@@ -50,6 +50,8 @@ _TEAM_ALIASES: dict[str, str] = {
     "澳洲": "Australia", "澳大利亞": "Australia", "澳大利亚": "Australia",
     "australia": "Australia",
     "埃及": "Egypt", "egypt": "Egypt",
+    "哥倫比亞": "Colombia", "哥伦比亚": "Colombia", "colombia": "Colombia",
+    "迦納": "Ghana", "加納": "Ghana", "加纳": "Ghana", "ghana": "Ghana",
 }
 
 # --------------------------------------------------------------------------- #
@@ -95,6 +97,14 @@ FIXTURES: list[dict] = [
         "venue": "AT&T Stadium, Arlington(達拉斯)",
         "teams": ["Australia", "Egypt"],
         "source": "https://socceroos.com.au/news/how-watch-australia-vs-egypt-fifa-world-cup-2026tm-round-32",
+    },
+    {
+        "stage": "32強淘汰賽",
+        "date": "2026-07-03",
+        "kickoff": "21:30 ET / 18:30 PT",
+        "venue": "Arrowhead Stadium(Kansas City Stadium), Kansas City",
+        "teams": ["Colombia", "Ghana"],
+        "source": "https://www.espn.com/espn/story/_/id/49224579/colombia-vs-ghana-kick-team-news-how-watch-world-cup-round-32-clash",
     },
 ]
 
