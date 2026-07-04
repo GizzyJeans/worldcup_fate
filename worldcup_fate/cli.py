@@ -64,6 +64,8 @@ def _to_dict(reading) -> dict:
         "kickoff": reading.kickoff,
         "winner": reading.winner,
         "knife_edge": reading.knife_edge,
+        "overtime_risk": reading.overtime_risk,
+        "handicap_line": reading.handicap_line,
         "predicted_score": list(reading.predicted_score),
         "predicted_total": reading.predicted_total,
         "confidence": reading.confidence,

@@ -45,6 +45,8 @@ class MatchReading:
     # 推導出的數值結果(便於程式化取用)
     winner: str = ""                      # "home" / "away" / "draw"
     knife_edge: bool = False              # 淘汰賽中戰力差極小、一線之間的對決
+    overtime_risk: bool = False           # 淘汰賽延長/PK 風險示警
+    handicap_line: float = 0.0            # 建議讓分盤口(0 = 平手盤)
     win_text: str = ""
     handicap_text: str = ""
     totals_text: str = ""
@@ -120,6 +122,24 @@ class MatchReading:
                 f"優勢屬「{tier}」等級;{underdog} 須仰賴關鍵變數方能翻盤。"
             )
 
+        # ---- 延長/PK 風險示警 --------------------------------------------- #
+        # 校準(2026-07-04,澳埃之戰實證):高動盪大牌(高塔/命運之輪/月亮/
+        # 惡魔/死神,volatility >= 8)坐鎮進球之潮或關鍵變數時,即使戰力差
+        # 明顯,淘汰賽仍恐戰至延長甚至 PK。九場回測中此訊號無誤報。
+        if knockout:
+            if self.knife_edge:
+                self.overtime_risk = True   # 一線之間本就提示延長/PK
+            else:
+                for key in ("total_goals", "wildcard"):
+                    card = self.cards[key].card
+                    if card.arcana == "major" and card.volatility >= 8:
+                        self.overtime_risk = True
+                        self.win_text += (
+                            "惟高動盪之牌鎮於要位,此戰恐生波折,"
+                            "不排除拖入延長甚至 PK。"
+                        )
+                        break
+
         # ---- 大小分 ------------------------------------------------------ #
         goal_energy = (
             home_e.goal + away_e.goal
@@ -194,10 +214,12 @@ class MatchReading:
         # ---- 讓分/受讓 --------------------------------------------------- #
         diff = abs(home_goals - away_goals)
         if self.winner == "draw" or diff == 0:
+            self.handicap_line = 0.0
             self.handicap_text = (
                 "牌面無明顯讓步空間,**平手盤 (0)** 最為貼合;受讓方價值浮現。"
             )
         elif self.knife_edge:
+            self.handicap_line = 0.5
             favored_name = self.home if self.winner == "home" else self.away
             underdog_name = self.away if self.winner == "home" else self.home
             self.handicap_text = (
@@ -205,16 +227,26 @@ class MatchReading:
                 f"平手盤與受讓 {underdog_name} 皆具價值,深盤不宜。"
             )
         else:
-            # 讓分線取在預期分差附近的半球盤
-            line_h = diff - 0.5
+            # 校準(2026-07-04):深盤屢屢過深(-1.5 兩役一勝一負),改依
+            # 優勢等級收淺盤口:些微 <=0.5、明顯 <=1.5、壓倒性依分差不設限。
+            edge = abs(margin)
+            raw_line = diff - 0.5
+            if edge > 8:
+                line_h = raw_line
+            elif edge > 5:
+                line_h = min(raw_line, 1.5)
+            else:
+                line_h = min(raw_line, 0.5)
+            self.handicap_line = line_h
+            capped_note = "(牌面分差雖更深,惟經實績校準收淺)" if raw_line > line_h else ""
             if self.winner == "home":
                 self.handicap_text = (
-                    f"主隊 **{self.home}** 可讓 **{line_h:.1f} 球**;"
+                    f"主隊 **{self.home}** 可讓 **{line_h:.1f} 球**{capped_note};"
                     f"若盤口讓得更深,受讓 {self.away} 反有保護價值。"
                 )
             else:
                 self.handicap_text = (
-                    f"客隊 **{self.away}** 可讓 **{line_h:.1f} 球**;"
+                    f"客隊 **{self.away}** 可讓 **{line_h:.1f} 球**{capped_note};"
                     f"若盤口讓得更深,受讓 {self.home} 反有保護價值。"
                 )
 
@@ -251,6 +283,8 @@ class MatchReading:
             base -= 6                             # 平局本就難測
         if self.knife_edge:
             base -= 6                             # 一線之間,與平局同樣難測
+        elif self.overtime_risk:
+            base -= 3                             # 動盪示警,勝負添波折
         base += verdict_e.momentum                # 定論之牌的氣勢加成
         self.confidence = int(_clamp(round(base), 30, 94))
 

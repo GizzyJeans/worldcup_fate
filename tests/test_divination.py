@@ -153,6 +153,38 @@ class TestDivination(unittest.TestCase):
                 h, a = r.predicted_score
                 self.assertNotEqual(h, a, f"{home} vs {away} [{stage}] 比分平手")
 
+    def test_overtime_risk_tower_case(self):
+        """澳埃之戰:高塔坐鎮進球之潮,須觸發延長/PK 示警(實證:PK 2:4)。"""
+        r = divine("澳洲", "埃及", stage="32強淘汰賽", date="2026-07-03")
+        self.assertFalse(r.knife_edge)
+        self.assertTrue(r.overtime_risk)
+
+    def test_overtime_risk_never_in_group_stage(self):
+        names = ["澳洲", "埃及", "阿根廷", "維德角", "哥倫比亞", "迦納"]
+        for i, home in enumerate(names):
+            away = names[(i + 1) % len(names)]
+            r = divine(home, away, stage="小組賽", date="2026-07-03")
+            self.assertFalse(r.overtime_risk, f"{home} vs {away} 小組賽不應示警延長")
+
+    def test_knife_edge_implies_overtime_risk(self):
+        r = divine("哥倫比亞", "迦納", stage="32強淘汰賽", date="2026-07-03")
+        if r.knife_edge:
+            self.assertTrue(r.overtime_risk)
+            self.assertLessEqual(r.handicap_line, 0.5)
+
+    def test_handicap_line_bounds(self):
+        """盤口不得深於預期分差,且些微優勢之局收淺至 0.5。"""
+        names = ["阿根廷", "法國", "巴西", "英格蘭", "西班牙", "德國", "日本", "美國"]
+        for stage in ["小組賽", "32強淘汰賽", "八強"]:
+            for i, home in enumerate(names):
+                away = names[(i + 1) % len(names)]
+                r = divine(home, away, stage=stage, date="2026-07-05")
+                h, a = r.predicted_score
+                diff = abs(h - a)
+                self.assertGreaterEqual(r.handicap_line, 0.0)
+                if diff > 0 and r.winner != "draw":
+                    self.assertLessEqual(r.handicap_line, diff - 0.5 + 1e-9)
+
     def test_group_stage_can_still_draw(self):
         """小組賽仍允許平局(校準只動淘汰賽)。"""
         winners = set()
