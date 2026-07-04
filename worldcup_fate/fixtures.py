@@ -52,6 +52,7 @@ _TEAM_ALIASES: dict[str, str] = {
     "埃及": "Egypt", "egypt": "Egypt",
     "哥倫比亞": "Colombia", "哥伦比亚": "Colombia", "colombia": "Colombia",
     "迦納": "Ghana", "加納": "Ghana", "加纳": "Ghana", "ghana": "Ghana",
+    "加拿大": "Canada", "canada": "Canada",
 }
 
 # --------------------------------------------------------------------------- #
@@ -105,6 +106,14 @@ FIXTURES: list[dict] = [
         "venue": "Arrowhead Stadium(Kansas City Stadium), Kansas City",
         "teams": ["Colombia", "Ghana"],
         "source": "https://www.espn.com/espn/story/_/id/49224579/colombia-vs-ghana-kick-team-news-how-watch-world-cup-round-32-clash",
+    },
+    {
+        "stage": "十六強",
+        "date": "2026-07-04",
+        "kickoff": "12:00 CT / 17:00 GMT",
+        "venue": "Houston Stadium(NRG Stadium), Houston",
+        "teams": ["Canada", "Morocco"],
+        "source": "https://www.aljazeera.com/sports/2026/7/3/canada-morocco-fifa-world-cup-round-of-16-saibari-prediction-schedule",
     },
 ]
 
