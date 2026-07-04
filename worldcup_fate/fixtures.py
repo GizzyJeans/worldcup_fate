@@ -53,6 +53,7 @@ _TEAM_ALIASES: dict[str, str] = {
     "哥倫比亞": "Colombia", "哥伦比亚": "Colombia", "colombia": "Colombia",
     "迦納": "Ghana", "加納": "Ghana", "加纳": "Ghana", "ghana": "Ghana",
     "加拿大": "Canada", "canada": "Canada",
+    "巴拉圭": "Paraguay", "paraguay": "Paraguay",
 }
 
 # --------------------------------------------------------------------------- #
@@ -114,6 +115,14 @@ FIXTURES: list[dict] = [
         "venue": "Houston Stadium(NRG Stadium), Houston",
         "teams": ["Canada", "Morocco"],
         "source": "https://www.aljazeera.com/sports/2026/7/3/canada-morocco-fifa-world-cup-round-of-16-saibari-prediction-schedule",
+    },
+    {
+        "stage": "十六強",
+        "date": "2026-07-04",
+        "kickoff": "17:00 ET / 21:00 GMT",
+        "venue": "Philadelphia Stadium(Lincoln Financial Field), Philadelphia",
+        "teams": ["Paraguay", "France"],
+        "source": "https://www.aljazeera.com/sports/2026/7/4/france-vs-paraguay-world-cup-round-of-16-mbappe-prediction-kickoff",
     },
 ]
 
