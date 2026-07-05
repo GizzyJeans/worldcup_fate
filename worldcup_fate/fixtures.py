@@ -132,6 +132,14 @@ FIXTURES: list[dict] = [
         "teams": ["Brazil", "Norway"],
         "source": "https://www.espn.com/soccer/story/_/id/49256507/brazil-vs-norway-fifa-world-cup-2026-tv-channel-how-watch-kickoff-live-stream-injury-predicted-lineups",
     },
+    {
+        "stage": "十六強",
+        "date": "2026-07-05",
+        "kickoff": "18:00 CT(場地當地)/ 隔日 01:00 BST",
+        "venue": "Estadio Azteca, Mexico City(高海拔)",
+        "teams": ["Mexico", "England"],
+        "source": "https://www.aljazeera.com/sports/2026/7/4/england-mexico-fifa-world-cup-azteca-kickoff-altitude-weather-explained",
+    },
 ]
 
 
