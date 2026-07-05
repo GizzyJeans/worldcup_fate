@@ -124,6 +124,14 @@ FIXTURES: list[dict] = [
         "teams": ["Paraguay", "France"],
         "source": "https://www.aljazeera.com/sports/2026/7/4/france-vs-paraguay-world-cup-round-of-16-mbappe-prediction-kickoff",
     },
+    {
+        "stage": "十六強",
+        "date": "2026-07-05",
+        "kickoff": "16:00 ET / 20:00 GMT",
+        "venue": "MetLife Stadium, East Rutherford(紐約/紐澤西)",
+        "teams": ["Brazil", "Norway"],
+        "source": "https://www.espn.com/soccer/story/_/id/49256507/brazil-vs-norway-fifa-world-cup-2026-tv-channel-how-watch-kickoff-live-stream-injury-predicted-lineups",
+    },
 ]
 
 
